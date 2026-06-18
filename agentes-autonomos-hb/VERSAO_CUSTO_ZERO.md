@@ -1,6 +1,6 @@
 # Agentes Autônomos HB — Versão Custo Zero
 
-> Esta versão prioriza custo zero ou mínimo, aproveitando ferramentas que o escritório já paga (Microsoft 365 Premium, RD Station, Slack) e opções gratuitas de IA e busca web. Os 10 agentes, os prompts e a lógica são os mesmos da versão completa — o que muda é a infraestrutura.
+> Esta versão prioriza custo zero ou mínimo, aproveitando ferramentas que o escritório já paga (Microsoft 365 Premium, RD Station, Slack, ChatGPT, Claude Pro) e opções gratuitas de IA e busca web. Os 10 agentes, os prompts e a lógica são os mesmos da versão completa — o que muda é a infraestrutura.
 
 ---
 
@@ -17,6 +17,7 @@
 | Calendário | — | Outlook Calendar (M365) | R$ 0 (já pago) |
 | Transcrição | — | Teams (M365) | R$ 0 (já pago) |
 | Docs/Storage | — | SharePoint / Word / Excel Online (M365) | R$ 0 (já pago) |
+| Base de tom de voz | — | **Custom GPT (ChatGPT)** com playbook HB | R$ 0 (já pago) |
 
 **Economia total: R$ 630-1.205/mês**
 **Custo adicional: R$ 0/mês**
@@ -55,17 +56,17 @@ Para a operação da HB (estimativa de 50-200 chamadas/dia nos 10 agentes), o ti
 
 **Quando NÃO é suficiente:** Textos jurídicos sofisticados (proposta detalhada, parecer). Se isso acontecer, migra-se apenas o Agente de Proposta (agente 6) para Claude API (~R$ 50-100/mês de custo marginal). Mas vale testar primeiro.
 
-**"E o Claude Pro que eu já pago?"**
-Continua útil. O Claude Pro (US$ 20/mês) é para uso manual — brainstorm, análise de documentos, pesquisa, revisão de textos. Não precisa cancelar nem mudar de plano. A assinatura Pro e a API gratuita do Gemini são coisas completamente diferentes:
+**"E o ChatGPT e o Claude Pro que já pagamos?"**
+Continuam úteis — cada um com seu papel. A assinatura do ChatGPT e do Claude Pro dá acesso ao chat (conversa manual). A API do Gemini é outra coisa: chamadas programáticas que o Power Automate faz sozinho. São três ferramentas complementares:
 
-| Item | Claude Pro | Gemini API |
-|------|-----------|-----------|
-| Como funciona | Você abre o chat e conversa | O Power Automate chama automaticamente |
-| Quem usa | Você (humano) | Os agentes (automação) |
-| Custo | US$ 20/mês (já pago) | R$ 0 |
-| Quando usar | Análises complexas, brainstorm, revisão | Tarefas repetitivas dos 10 agentes |
+| Item | ChatGPT (já pago) | Claude Pro (já pago) | Gemini API (grátis) |
+|------|-------------------|---------------------|-------------------|
+| Como funciona | Chat manual | Chat manual | Power Automate chama automaticamente |
+| Papel | Tom de voz do HB (Custom GPT) | Análise profunda, brainstorm | Motor dos 10 agentes |
+| Quem usa | Milena, time comercial | Juliana, Thiago, Milena | Power Automate (automático) |
+| Custo | Já pago | Já pago | R$ 0 |
 
-**Como contratar:** Acessar ai.google.dev → criar projeto → gerar chave de API. 5 minutos, zero custo.
+**Como contratar o Gemini API:** Acessar ai.google.dev → criar projeto → gerar chave de API. 5 minutos, zero custo.
 
 ### 3. Tavily (free) — busca web para os agentes
 
@@ -102,6 +103,116 @@ Na versão paga, o Apollo.io (R$ 200-400/mês) buscaria dados de empresas automa
 4. **IA analisa tudo junto** → classifica ICP, identifica dores, calcula probabilidade de fit
 
 **É menos preciso que o Apollo?** Sim — faltam dados como faturamento estimado e tecnologias usadas. **Funciona para a operação atual?** Perfeitamente. O Apollo pode entrar depois se o volume crescer e justificar.
+
+### 6. Custom GPT (ChatGPT) — a voz do escritório
+
+**O que é:** Um GPT personalizado dentro do ChatGPT que vocês já assinam, treinado com o Playbook Comercial, os scripts, o tom de voz, os arquétipos (Sábio 40%, Prestativo 35%, Criador 25%) e os exemplos reais de mensagens do HB. Ele se torna o **repositório vivo do jeito de falar do escritório**.
+
+**Por que isso é importante:** O maior risco de usar IA para gerar mensagens comerciais é soar genérico ou "robotizado". O Custom GPT resolve isso porque ele já conhece:
+- O tom consultivo, humano, sem juridiquês
+- As frases-chave do HB ("O jurídico que chega antes do problema", "Crescer sem estrutura cobra a conta")
+- O que funciona (diagnóstico, conversa leve, perguntas abertas) e o que não funciona (proposta genérica, venda direta, pressão)
+- As diferenças entre ICPs (startup vs. empresa tradicional vs. administradora)
+- Os scripts de LinkedIn, WhatsApp, e-mail e ligação
+- As objeções e como responder a cada uma
+
+**Como funciona na prática — dois usos:**
+
+#### Uso 1: Gerador de referência de tom (manual)
+A Milena ou a Juliana abrem o Custom GPT no ChatGPT e pedem:
+- "Gera uma mensagem de LinkedIn para uma fintech que acabou de captar"
+- "Como abordar uma administradora de condomínio por WhatsApp?"
+- "Reescreve essa mensagem no tom do HB"
+
+Ele responde já no tom certo. Isso já funciona hoje, sem automação nenhuma.
+
+#### Uso 2: Base de referência para os agentes automatizados
+O Custom GPT gera **exemplos de referência por ICP e canal** que alimentam os prompts do Gemini API nos agentes. Funciona assim:
+
+```
+1. No Custom GPT (manual, uma vez):
+   → "Gere 10 exemplos de mensagem de LinkedIn para startups em captação"
+   → "Gere 10 exemplos de WhatsApp para empresas tradicionais"
+   → "Gere 10 exemplos de follow-up para propostas enviadas"
+
+2. Esses exemplos viram o "banco de referência de tom"
+   → Salvos no SharePoint em um arquivo de referência
+
+3. Nos agentes automatizados (Power Automate + Gemini):
+   → O prompt inclui: "Use os exemplos abaixo como referência de tom..."
+   → O Gemini gera a mensagem personalizada NAQUELE tom
+   → Resultado: mensagens automáticas que soam como o HB, não como robô
+```
+
+**O que colocar dentro do Custom GPT:**
+
+| Conteúdo | De onde vem |
+|----------|------------|
+| Tom de voz e arquétipos | Playbook seção 1.3 |
+| Frases-chave e conceitos | Playbook seção 1.4 |
+| O que funciona / não funciona | Playbook seção 1.3 |
+| Scripts de LinkedIn | Playbook seção 6.3, 7.1 |
+| Scripts de WhatsApp | Playbook seção 7.1 |
+| Scripts de ligação | Playbook seção 7.2 |
+| Scripts de e-mail | Playbook seção 7.1 |
+| Gatilhos para startups | Playbook seção 6.4 |
+| Placeholders | Playbook seção 6.5 |
+| Gestão de objeções | Playbook seção 9 |
+| Diferenças por ICP | Playbook seção 3 |
+| Método TRUST | Playbook seção 4 |
+
+**Como criar:** Dentro do ChatGPT → "Explore GPTs" → "Create" → colar as instruções com todo o conteúdo acima. Leva ~1 hora para montar bem. Zero custo adicional.
+
+**Resultado:** Qualquer pessoa do time abre o Custom GPT e gera mensagens no tom exato do HB. E os agentes automatizados usam os exemplos gerados como referência de estilo.
+
+---
+
+### Como ChatGPT, Claude Pro e Gemini API trabalham juntos
+
+Vocês têm três IAs. Cada uma com um papel diferente:
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    IAs do escritório                      │
+├───────────────┬──────────────────┬───────────────────────┤
+│  Custom GPT   │   Claude Pro     │    Gemini API         │
+│  (ChatGPT)    │   (chat)         │    (automação)        │
+├───────────────┼──────────────────┼───────────────────────┤
+│ Tom de voz    │ Análise profunda │ Motor dos 10 agentes  │
+│ do escritório │ e estratégica    │                       │
+├───────────────┼──────────────────┼───────────────────────┤
+│ Gera exemplos │ Brainstorm       │ ICP Scanner           │
+│ de mensagens  │ jurídico         │ Diagnóstico           │
+│ por ICP/canal │                  │ Mensagens             │
+│               │ Revisão de       │ Briefing              │
+│ Repositório   │ propostas        │ Pós-reunião           │
+│ de referência │ complexas        │ Proposta              │
+│ de comunicação│                  │ CRM automático        │
+│               │ Análise de       │ Follow-up             │
+│ Treinamento   │ contratos e      │ Eventos               │
+│ do time       │ documentos       │ Inteligência          │
+├───────────────┼──────────────────┼───────────────────────┤
+│ Quem usa:     │ Quem usa:        │ Quem usa:             │
+│ Milena, time  │ Juliana, Thiago  │ Power Automate        │
+│ comercial     │ Milena           │ (automático)          │
+├───────────────┼──────────────────┼───────────────────────┤
+│ Custo: já pago│ Custo: já pago   │ Custo: R$ 0 (grátis)  │
+└───────────────┴──────────────────┴───────────────────────┘
+```
+
+**Fluxo completo de uma mensagem automatizada:**
+
+```
+Custom GPT (uma vez)          Gemini API (automático, toda vez)
+─────────────────────         ─────────────────────────────────
+Gera 30 exemplos de     ──►   Prompt do agente inclui:
+mensagens no tom HB           "Referência de tom: [exemplos]"
+por ICP e canal               + dados do lead específico
+                              ──►  Mensagem personalizada
+                                   no tom HB
+                              ──►  Slack para aprovação
+                              ──►  Disparo
+```
 
 ---
 
@@ -169,7 +280,8 @@ Os 10 agentes continuam exatamente os mesmos. Os prompts são idênticos. O que 
 | CRM | RD Station: já pago | RD Station: já pago |
 | Comunicação | Slack: já pago | Slack: já pago |
 | M365 | já pago | já pago |
-| Claude Pro | US$ 20/mês (manter para uso manual) | US$ 20/mês (manter para uso manual) |
+| ChatGPT | já pago (Custom GPT = tom de voz) | já pago |
+| Claude Pro | já pago (análise e brainstorm) | já pago |
 | **Total adicional** | **R$ 630-1.205/mês** | **R$ 0/mês** |
 
 ---

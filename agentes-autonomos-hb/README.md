@@ -11,7 +11,7 @@
 | Enriquecimento | **Apollo/Clearbit API** ou **scraping LinkedIn** | Dados firmográficos |
 | Busca web | **Tavily / SerpAPI** | Para pesquisa de empresas em tempo real |
 | Storage | **Google Sheets / SharePoint** | Já usado pelo time |
-| Transcrição | **AssemblyAI / Whisper** | Para o agente pós-reunião |
+| Transcrição | **Microsoft Teams** | Já utilizado pelo escritório, gravações e transcrições ficam salvas automaticamente |
 
 ---
 
@@ -226,12 +226,12 @@ FORMATO:
 
 ### 5. Pós-Reunião
 
-**Trigger:** Gravação da reunião disponível (Google Meet/Zoom)
+**Trigger:** Nova transcrição disponível na pasta do Teams (ou schedule periódico)
 
 **Fluxo Make:**
 ```
-Webhook: gravação disponível
-  → Enviar áudio para AssemblyAI/Whisper (transcrição)
+Schedule/Webhook: verificar pasta de gravações do Teams
+  → Buscar transcrição mais recente (já gerada pelo Teams)
   → Claude API: analisar transcrição
   → Salvar resumo no RD Station
   → Criar tarefas no RD Station
@@ -263,7 +263,7 @@ RETORNE:
 10. Oportunidades de upsell/cross-sell identificadas
 ```
 
-**Esforço:** Médio (~2 semanas, integração de transcrição)
+**Esforço:** Médio (~2 semanas, integração com pasta Teams)
 **Impacto:** Muito Alto — maior economia de tempo individual
 
 ---
@@ -498,7 +498,7 @@ RETORNE:
 | 6. Proposta | 2 sem | Alto |
 | 9. Eventos | 2 sem | Alto |
 
-**Por quê terceiro:** Requer integração de transcrição e templates mais complexos.
+**Por quê terceiro:** Requer integração com pasta do Teams e templates mais elaborados.
 
 ### Fase 4 — Full Automation (Semanas 10-14)
 | Agente | Esforço | Impacto |
@@ -509,18 +509,91 @@ RETORNE:
 
 ---
 
-## Custos Estimados (mensal)
+## Investimento e Justificativa
 
-| Item | Custo estimado |
-|------|---------------|
-| Claude API (Sonnet) | R$ 200-500/mês |
-| Make.com (Pro) | R$ 150-300/mês |
-| Apollo.io (enriquecimento) | R$ 200-400/mês |
-| AssemblyAI (transcrição) | R$ 100-200/mês |
-| Tavily/SerpAPI (busca) | R$ 50-100/mês |
-| **Total** | **R$ 700-1.500/mês** |
+### O que é cada ferramenta e por que precisamos dela
 
-Comparado ao custo de uma pessoa fazendo essas tarefas manualmente (~R$ 4.000-6.000/mês), o ROI é claro.
+#### 1. Claude API — o cérebro dos agentes
+**O que é:** A API (Interface de Programação) do Claude permite que outros sistemas enviem textos e recebam respostas da inteligência artificial, sem precisar abrir o chat manualmente. É o que transforma o Claude de uma ferramenta de conversa em um motor que trabalha sozinho dentro dos fluxos automatizados.
+
+**Por que precisamos:** Todos os 10 agentes dependem do Claude para analisar dados, classificar leads, gerar mensagens, criar diagnósticos e propostas. Sem a API, alguém teria que copiar e colar cada informação no chat — exatamente o trabalho operacional que queremos eliminar.
+
+**Sobre o plano atual:** Hoje a assinatura do Claude (Pro, ~US$ 20/mês) dá acesso ao chat — ou seja, uma pessoa conversando com o Claude manualmente. Para os agentes autônomos, precisamos da **API**, que é cobrada à parte por volume de uso (por quantidade de texto processado). São produtos separados:
+
+| Plano | O que faz | Serve para os agentes? |
+|-------|-----------|----------------------|
+| Claude Pro (US$ 20/mês) | Chat manual, uma pessoa por vez | Não — é uso manual |
+| Claude API (pay-per-use) | Chamadas programáticas, ilimitadas em paralelo | **Sim — é o que os agentes usam** |
+
+**Recomendação:** Manter o Pro para uso pessoal (pesquisa, brainstorm, análise) e contratar a API separadamente. O custo da API depende do volume — para o fluxo da HB (estimativa de 500-1.500 chamadas/mês), o custo fica entre **R$ 200-500/mês**. É possível começar pequeno e escalar conforme os agentes são ativados.
+
+Para contratar: acessar console.anthropic.com, criar conta com cartão de crédito, e gerar uma chave de API. Essa chave é inserida no Make para que os cenários consigam chamar o Claude.
+
+#### 2. Make.com (antigo Integromat) — o orquestrador
+**O que é:** Plataforma de automação visual que conecta sistemas entre si. Funciona como um "maestro": quando algo acontece em um sistema (ex: novo lead no RD), o Make dispara uma sequência de ações em outros sistemas (buscar dados, chamar Claude, atualizar CRM, enviar Slack).
+
+**Por que precisamos:** É o Make que transforma os agentes de "prompts soltos" em fluxos completos que rodam sozinhos. Sem ele, precisaríamos de um desenvolvedor programando cada integração manualmente.
+
+**Vocês já usam Make?** Se sim, verificar o plano atual. O plano Pro (~US$ 16/mês, ~R$ 90/mês) permite 10.000 operações/mês. Para os 10 agentes rodando diariamente, estimamos entre 5.000 e 15.000 operações/mês — pode ser necessário o plano Teams (~US$ 29/mês, ~R$ 165/mês) conforme o volume cresce.
+
+#### 3. Apollo.io — enriquecimento de dados
+**O que é:** Plataforma de inteligência comercial que, a partir do nome de uma empresa ou pessoa, retorna informações como: número de funcionários, faturamento estimado, tecnologias usadas, rodadas de investimento, e-mails corporativos, cargos dos decisores, e LinkedIn dos contatos.
+
+**Por que precisamos:** O Agente ICP Scanner e o Agente de Eventos precisam de dados que não estão no site da empresa. Hoje a Milena faz essa pesquisa manualmente — abrindo LinkedIn, Crunchbase, Google. O Apollo automatiza isso em segundos.
+
+**Alternativa gratuita (limitada):** Começar sem Apollo, usando apenas busca web (Tavily). O resultado será menos preciso, mas funciona para validar o conceito antes de investir. O Apollo pode entrar na Fase 2.
+
+#### 4. Tavily — busca web inteligente
+**O que é:** API de busca web otimizada para IA. Diferente do Google, o Tavily retorna o conteúdo das páginas já extraído e limpo, pronto para o Claude analisar. Quando o agente precisa "pesquisar uma empresa na internet", é o Tavily que faz essa busca.
+
+**Por que precisamos:** O ICP Scanner precisa buscar notícias recentes, informações do site, e sinais de mercado. O Tavily faz isso de forma programática — sem precisar abrir navegador.
+
+**Custo:** Tem plano gratuito (1.000 buscas/mês) que é suficiente para começar. Plano pago a partir de US$ 25/mês para maior volume.
+
+#### 5. Microsoft Teams — transcrição (custo zero adicional)
+**O que é:** Vocês já usam o Teams para reuniões e ele já gera transcrições automaticamente. O Agente Pós-Reunião simplesmente acessa a pasta onde essas transcrições ficam salvas e as envia para o Claude analisar.
+
+**Custo adicional:** Nenhum. Já está no ambiente.
+
+---
+
+### Tabela de custos consolidada
+
+| Ferramenta | O que faz nos agentes | Custo mensal | Já temos? |
+|------------|----------------------|-------------|-----------|
+| Claude API | Cérebro de todos os agentes | R$ 200-500 | Não (temos o chat Pro, não a API) |
+| Make.com Pro | Conecta e orquestra tudo | R$ 90-165 | Verificar plano atual |
+| Apollo.io | Dados de empresas e contatos | R$ 200-400 | Não (pode entrar na Fase 2) |
+| Tavily | Busca web para pesquisa | R$ 0-140 | Não (plano free suficiente no início) |
+| RD Station CRM | Fonte de verdade comercial | Já contratado | Sim |
+| Slack | Notificações e aprovações | Já contratado | Sim |
+| Teams | Transcrições de reunião | Já contratado | Sim |
+| SharePoint | Armazenamento de docs | Já contratado | Sim |
+
+### Cenários de investimento
+
+| Cenário | O que inclui | Custo mensal | Quando |
+|---------|-------------|-------------|--------|
+| **Mínimo viável** | Claude API + Make + Tavily free | **R$ 290-665** | Fase 1 |
+| **Operação completa** | + Apollo.io | **R$ 490-1.065** | Fase 2+ |
+
+### Justificativa de ROI
+
+| Métrica | Sem agentes | Com agentes |
+|---------|-------------|-------------|
+| Tempo de pesquisa por lead | 30-60 min | 2 min (automático) |
+| Tempo de briefing pré-reunião | 20-30 min | 0 min (entregue no Slack) |
+| Tempo de pós-reunião (resumo + CRM) | 30-45 min | 5 min (revisão) |
+| Tempo de criação de mensagens | 15-20 min/lead | 1 min (aprovação) |
+| Leads esquecidos sem follow-up | Frequente | Zero |
+| Tempo de processamento pós-evento | 2-5 dias | 2-4 horas |
+| Preenchimento manual de CRM | 15-20 min/interação | Automático |
+
+**Estimativa conservadora:** A Milena e a Sonder economizam juntas **15-20 horas/semana** de trabalho operacional. Isso equivale a aproximadamente **R$ 3.000-5.000/mês** em tempo de trabalho qualificado que pode ser redirecionado para relacionamento, networking e atividades que exigem presença humana.
+
+**Investimento mensal: R$ 290-1.065**
+**Economia mensal em tempo: R$ 3.000-5.000**
+**ROI: 3x a 17x o investimento**
 
 ---
 
@@ -529,5 +602,5 @@ Comparado ao custo de uma pessoa fazendo essas tarefas manualmente (~R$ 4.000-6.
 1. **Aprovação humana vs. automação total:** Para quais ações a Milena/Juliana querem aprovar antes do disparo? (Recomendação: aprovar mensagens no início, depois ir liberando conforme confiança cresce)
 2. **WhatsApp:** Usar API oficial (WABA) ou ferramentas como Z-API? A API oficial é mais confiável mas mais cara.
 3. **LinkedIn:** Dripify já está no stack. Integrar com Make ou manter separado?
-4. **Transcrição:** Google Meet grava nativamente. Qual ferramenta de transcrição preferem?
+4. **Make.com:** Qual plano vocês têm hoje? Precisamos verificar o limite de operações.
 5. **Template de proposta:** Já existe um template padrão no Google Docs/Word?

@@ -10,7 +10,7 @@
 | Comunicação | **Slack** | Já usado para alertas entre etapas |
 | Enriquecimento | **Apollo/Clearbit API** ou **scraping LinkedIn** | Dados firmográficos |
 | Busca web | **Tavily / SerpAPI** | Para pesquisa de empresas em tempo real |
-| Storage | **Google Sheets / SharePoint** | Já usado pelo time |
+| Storage | **SharePoint / OneDrive / Excel Online** | Já incluído no Microsoft 365 Premium |
 | Transcrição | **Microsoft Teams** | Já utilizado pelo escritório, gravações e transcrições ficam salvas automaticamente |
 
 ---
@@ -34,7 +34,7 @@ Cada agente é um **cenário no Make** que:
 1. Recebe um trigger (webhook, schedule, ou mudança no CRM)
 2. Coleta dados de fontes externas (web, LinkedIn, CRM)
 3. Envia prompt estruturado para Claude API
-4. Distribui a saída (CRM, Slack, e-mail, Google Docs)
+4. Distribui a saída (CRM, Slack, e-mail, Word/SharePoint)
 
 ---
 
@@ -107,7 +107,7 @@ RD Station: lead mudou para "Qualificado"
   → Buscar LinkedIn dos decisores
   → Claude API: gerar diagnóstico + perguntas
   → Salvar no RD Station
-  → Criar doc no Google Docs
+  → Criar doc no Word Online (SharePoint)
   → Notificar Juliana via Slack com link do doc
 ```
 
@@ -183,11 +183,11 @@ REGRAS:
 
 ### 4. Briefing para Reunião
 
-**Trigger:** Reunião agendada no Google Calendar (15 min antes)
+**Trigger:** Reunião agendada no Outlook Calendar (15 min antes)
 
 **Fluxo Make:**
 ```
-Google Calendar: evento com tag "HB Reunião" em 15 min
+Outlook Calendar: evento com tag "HB Reunião" em 15 min
   → Buscar lead no RD Station pelo nome/empresa
   → Buscar dados do ICP Scanner
   → Buscar histórico de contatos no RD
@@ -278,7 +278,7 @@ RD: lead em etapa "Proposta"
   → Buscar dados completos do lead
   → Buscar diagnóstico e pós-reunião
   → Claude API: gerar proposta
-  → Criar Google Doc com template HB
+  → Criar documento Word no SharePoint com template HB
   → Notificar Thiago via Slack para revisão
 ```
 
@@ -442,7 +442,7 @@ Schedule: sexta 14h
   → Claude API: análise de padrões
   → Gerar relatório
   → Enviar via Slack para Juliana e Thiago
-  → Salvar no Google Sheets (histórico)
+  → Salvar no Excel Online / SharePoint (histórico)
 ```
 
 **Prompt base:**
@@ -566,9 +566,8 @@ Para contratar: acessar console.anthropic.com, criar conta com cartão de crédi
 | Apollo.io | Dados de empresas e contatos | R$ 200-400 | Não (pode entrar na Fase 2) |
 | Tavily | Busca web para pesquisa | R$ 0-140 | Não (plano free suficiente no início) |
 | RD Station CRM | Fonte de verdade comercial | Já contratado | Sim |
+| Microsoft 365 Premium | Teams, Outlook Calendar, SharePoint, Excel Online, Word Online | Já contratado | Sim |
 | Slack | Notificações e aprovações | Já contratado | Sim |
-| Teams | Transcrições de reunião | Já contratado | Sim |
-| SharePoint | Armazenamento de docs | Já contratado | Sim |
 
 ### Cenários de investimento
 
@@ -603,4 +602,4 @@ Para contratar: acessar console.anthropic.com, criar conta com cartão de crédi
 2. **WhatsApp:** Usar API oficial (WABA) ou ferramentas como Z-API? A API oficial é mais confiável mas mais cara.
 3. **LinkedIn:** Dripify já está no stack. Integrar com Make ou manter separado?
 4. **Make.com:** Qual plano vocês têm hoje? Precisamos verificar o limite de operações.
-5. **Template de proposta:** Já existe um template padrão no Google Docs/Word?
+5. **Template de proposta:** Já existe um template padrão no Word/SharePoint?

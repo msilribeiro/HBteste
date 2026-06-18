@@ -4,10 +4,10 @@
 
 | Camada | Tecnologia | Justificativa |
 |--------|-----------|---------------|
-| Orquestração | **Make (Integromat)** | Já conectado ao ambiente HB. Dispara agentes, conecta CRM, Slack, Calendar |
+| Orquestração | **Make (Integromat)** | Já conectado ao ambiente HB. Dispara agentes, conecta CRM, Teams, Calendar |
 | LLM | **Claude API (Sonnet)** | Qualidade de texto em português, raciocínio jurídico, custo acessível |
 | CRM | **RD Station CRM** | Já é a fonte de verdade do playbook. API disponível via MCP |
-| Comunicação | **Slack** | Já usado para alertas entre etapas |
+| Comunicação | **Microsoft Teams** | Já incluído no M365 Premium. Canais, notificações, bots e webhooks |
 | Enriquecimento | **Apollo/Clearbit API** ou **scraping LinkedIn** | Dados firmográficos |
 | Busca web | **Tavily / SerpAPI** | Para pesquisa de empresas em tempo real |
 | Storage | **SharePoint / OneDrive / Excel Online** | Já incluído no Microsoft 365 Premium |
@@ -25,7 +25,7 @@
         ┌──────────────────┼──────────────────┐
         │                  │                  │
    ┌────▼────┐       ┌────▼────┐       ┌────▼────┐
-   │ RD Stn  │       │  Slack  │       │ Claude  │
+   │ RD Stn  │       │  Teams  │       │ Claude  │
    │  CRM    │       │         │       │   API   │
    └─────────┘       └─────────┘       └─────────┘
 ```
@@ -34,7 +34,7 @@ Cada agente é um **cenário no Make** que:
 1. Recebe um trigger (webhook, schedule, ou mudança no CRM)
 2. Coleta dados de fontes externas (web, LinkedIn, CRM)
 3. Envia prompt estruturado para Claude API
-4. Distribui a saída (CRM, Slack, e-mail, Word/SharePoint)
+4. Distribui a saída (CRM, Teams, e-mail, Word/SharePoint)
 
 ---
 
@@ -53,7 +53,7 @@ Webhook/RD trigger
   → Montar prompt com contexto
   → Claude API: classificar ICP + gerar briefing
   → Salvar resultado no RD Station (campo customizado)
-  → Notificar Milena via Slack
+  → Notificar Milena via Teams
 ```
 
 **Prompt base para Claude:**
@@ -108,7 +108,7 @@ RD Station: lead mudou para "Qualificado"
   → Claude API: gerar diagnóstico + perguntas
   → Salvar no RD Station
   → Criar doc no Word Online (SharePoint)
-  → Notificar Juliana via Slack com link do doc
+  → Notificar Juliana via Teams com link do doc
 ```
 
 **Prompt base:**
@@ -139,14 +139,14 @@ RETORNE:
 
 ### 3. Personalização de Mensagens
 
-**Trigger:** Novo lead classificado ou solicitação manual via Slack
+**Trigger:** Novo lead classificado ou solicitação manual via Teams
 
 **Fluxo Make:**
 ```
-Trigger (Slack command ou RD)
+Trigger (Teams command ou RD)
   → Buscar dados do lead + ICP
   → Claude API: gerar mensagens personalizadas
-  → Devolver via Slack (ou salvar no RD como nota)
+  → Devolver via Teams (ou salvar no RD como nota)
 ```
 
 **Prompt base:**
@@ -193,7 +193,7 @@ Outlook Calendar: evento com tag "HB Reunião" em 15 min
   → Buscar histórico de contatos no RD
   → Buscar diagnóstico comercial (se existir)
   → Claude API: compilar briefing executivo
-  → Enviar via Slack para Juliana
+  → Enviar via Teams para Juliana
   → Enviar por e-mail como backup
 ```
 
@@ -235,7 +235,7 @@ Schedule/Webhook: verificar pasta de gravações do Teams
   → Claude API: analisar transcrição
   → Salvar resumo no RD Station
   → Criar tarefas no RD Station
-  → Notificar via Slack
+  → Notificar via Teams
   → Atualizar estágio do lead se necessário
 ```
 
@@ -270,7 +270,7 @@ RETORNE:
 
 ### 6. Proposta
 
-**Trigger:** Solicitação via Slack ou mudança de etapa no RD ("Proposta")
+**Trigger:** Solicitação via Teams ou mudança de etapa no RD ("Proposta")
 
 **Fluxo Make:**
 ```
@@ -279,7 +279,7 @@ RD: lead em etapa "Proposta"
   → Buscar diagnóstico e pós-reunião
   → Claude API: gerar proposta
   → Criar documento Word no SharePoint com template HB
-  → Notificar Thiago via Slack para revisão
+  → Notificar Thiago via Teams para revisão
 ```
 
 **Prompt base:**
@@ -324,7 +324,7 @@ Cenário A — Pós-reunião:
 Cenário B — Diário (schedule):
   Buscar deals ativos no RD
     → Para cada deal sem atividade recente:
-      → Criar alerta no Slack
+      → Criar alerta no Teams
       → Sugerir próxima ação
 
 Cenário C — E-mail/WhatsApp (futuro):
@@ -360,7 +360,7 @@ Schedule: 8h todos os dias úteis
     - Reunião sem retorno há 15+ dias
   → Para cada lead:
     → Claude API: gerar mensagem de follow-up personalizada
-    → Enviar sugestão via Slack para Milena
+    → Enviar sugestão via Teams para Milena
     → Milena aprova → disparo automático (WhatsApp/e-mail)
 ```
 
@@ -404,7 +404,7 @@ Webhook: planilha de contatos do evento
     → Criar lead no RD Station
     → Gerar mensagem de abordagem pós-evento
   → Gerar relatório consolidado
-  → Enviar via Slack
+  → Enviar via Teams
 ```
 
 **Prompt base:**
@@ -441,7 +441,7 @@ Schedule: sexta 14h
   → Buscar objeções registradas
   → Claude API: análise de padrões
   → Gerar relatório
-  → Enviar via Slack para Juliana e Thiago
+  → Enviar via Teams para Juliana e Thiago
   → Salvar no Excel Online / SharePoint (histórico)
 ```
 
@@ -530,7 +530,7 @@ RETORNE:
 Para contratar: acessar console.anthropic.com, criar conta com cartão de crédito, e gerar uma chave de API. Essa chave é inserida no Make para que os cenários consigam chamar o Claude.
 
 #### 2. Make.com (antigo Integromat) — o orquestrador
-**O que é:** Plataforma de automação visual que conecta sistemas entre si. Funciona como um "maestro": quando algo acontece em um sistema (ex: novo lead no RD), o Make dispara uma sequência de ações em outros sistemas (buscar dados, chamar Claude, atualizar CRM, enviar Slack).
+**O que é:** Plataforma de automação visual que conecta sistemas entre si. Funciona como um "maestro": quando algo acontece em um sistema (ex: novo lead no RD), o Make dispara uma sequência de ações em outros sistemas (buscar dados, chamar Claude, atualizar CRM, enviar notificação no Teams).
 
 **Por que precisamos:** É o Make que transforma os agentes de "prompts soltos" em fluxos completos que rodam sozinhos. Sem ele, precisaríamos de um desenvolvedor programando cada integração manualmente.
 
@@ -567,7 +567,7 @@ Para contratar: acessar console.anthropic.com, criar conta com cartão de crédi
 | Tavily | Busca web para pesquisa | R$ 0-140 | Não (plano free suficiente no início) |
 | RD Station CRM | Fonte de verdade comercial | Já contratado | Sim |
 | Microsoft 365 Premium | Teams, Outlook Calendar, SharePoint, Excel Online, Word Online | Já contratado | Sim |
-| Slack | Notificações e aprovações | Já contratado | Sim |
+| Microsoft Teams (chat) | Notificações e aprovações | Já contratado (M365) | Sim |
 
 ### Cenários de investimento
 
@@ -581,7 +581,7 @@ Para contratar: acessar console.anthropic.com, criar conta com cartão de crédi
 | Métrica | Sem agentes | Com agentes |
 |---------|-------------|-------------|
 | Tempo de pesquisa por lead | 30-60 min | 2 min (automático) |
-| Tempo de briefing pré-reunião | 20-30 min | 0 min (entregue no Slack) |
+| Tempo de briefing pré-reunião | 20-30 min | 0 min (entregue no Teams) |
 | Tempo de pós-reunião (resumo + CRM) | 30-45 min | 5 min (revisão) |
 | Tempo de criação de mensagens | 15-20 min/lead | 1 min (aprovação) |
 | Leads esquecidos sem follow-up | Frequente | Zero |

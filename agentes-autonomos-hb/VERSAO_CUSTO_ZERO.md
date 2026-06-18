@@ -1,6 +1,6 @@
 # Agentes Autônomos HB — Versão Custo Zero
 
-> Esta versão prioriza custo zero ou mínimo, aproveitando ferramentas que o escritório já paga (Microsoft 365 Premium, RD Station, Slack, ChatGPT, Claude Pro) e opções gratuitas de IA e busca web. Os 10 agentes, os prompts e a lógica são os mesmos da versão completa — o que muda é a infraestrutura.
+> Esta versão prioriza custo zero ou mínimo, aproveitando ferramentas que o escritório já paga (Microsoft 365 Premium, RD Station, ChatGPT, Claude Pro) e opções gratuitas de IA e busca web. Os 10 agentes, os prompts e a lógica são os mesmos da versão completa — o que muda é a infraestrutura.
 
 ---
 
@@ -13,13 +13,15 @@
 | Enriquecimento | Apollo.io (~R$ 200-400/mês) | **Busca web + LLM** (grátis) | R$ 200-400 |
 | Busca web | Tavily pago (~R$ 140/mês) | **Tavily free** (1.000 buscas/mês) | R$ 140 |
 | CRM | RD Station | RD Station | R$ 0 (já pago) |
-| Comunicação | Slack | Slack | R$ 0 (já pago) |
+| Comunicação | ~~Slack~~ (cancelar) | **Microsoft Teams** (já incluso no M365) | R$ 0 + economia do Slack |
 | Calendário | — | Outlook Calendar (M365) | R$ 0 (já pago) |
 | Transcrição | — | Teams (M365) | R$ 0 (já pago) |
 | Docs/Storage | — | SharePoint / Word / Excel Online (M365) | R$ 0 (já pago) |
 | Base de tom de voz | — | **Custom GPT (ChatGPT)** com playbook HB | R$ 0 (já pago) |
 
-**Economia total: R$ 630-1.205/mês**
+**Economia em ferramentas novas evitadas: R$ 630-1.205/mês**
+**Economia com cancelamento do Slack: R$ 200-600/mês**
+**Economia total: R$ 830-1.805/mês**
 **Custo adicional: R$ 0/mês**
 
 ---
@@ -31,9 +33,9 @@
 **O que é:** Ferramenta de automação da Microsoft que **já está incluída no Microsoft 365 Premium** que vocês pagam. Funciona como um maestro: quando algo acontece em um sistema (ex: novo lead no RD, reunião agendada no Outlook), ele dispara uma sequência automática de ações em outros sistemas.
 
 **O que faz na prática:**
-- "Quando chegar um novo lead no RD → buscar dados da empresa → chamar a IA → classificar o ICP → atualizar o CRM → avisar a Milena no Slack"
-- "15 minutos antes de uma reunião → buscar tudo sobre o lead → montar briefing → enviar para a Juliana no Slack"
-- "Toda manhã às 8h → verificar leads sem resposta há 5 dias → gerar mensagens de follow-up → enviar sugestões no Slack"
+- "Quando chegar um novo lead no RD → buscar dados da empresa → chamar a IA → classificar o ICP → atualizar o CRM → avisar a Milena no Teams"
+- "15 minutos antes de uma reunião → buscar tudo sobre o lead → montar briefing → enviar para a Juliana no Teams"
+- "Toda manhã às 8h → verificar leads sem resposta há 5 dias → gerar mensagens de follow-up → enviar sugestões no Teams"
 
 **Por que não estávamos usando:** Provavelmente ninguém sabia que já estava incluso no plano. O Power Automate faz o mesmo que o Make.com — a diferença é que ele já é de vocês.
 
@@ -104,7 +106,39 @@ Na versão paga, o Apollo.io (R$ 200-400/mês) buscaria dados de empresas automa
 
 **É menos preciso que o Apollo?** Sim — faltam dados como faturamento estimado e tecnologias usadas. **Funciona para a operação atual?** Perfeitamente. O Apollo pode entrar depois se o volume crescer e justificar.
 
-### 6. Custom GPT (ChatGPT) — a voz do escritório
+### 6. Microsoft Teams (chat) — substitui o Slack (economia real)
+
+**O que muda:** Hoje o escritório paga o Slack para comunicação interna — canais, notificações, alertas automáticos do CRM. O Teams já faz tudo isso e já está incluso no M365 Premium.
+
+**O que o Teams faz que o Slack também faz:**
+
+| Funcionalidade | Slack | Teams |
+|---------------|-------|-------|
+| Canais por tema/projeto | Sim | Sim |
+| Mensagens diretas | Sim | Sim |
+| Notificações automáticas (webhooks) | Sim | Sim (Incoming Webhook / Power Automate) |
+| Bots e automações | Sim (apps) | Sim (Power Automate nativo) |
+| Integração com CRM | Via app/webhook | Via Power Automate / webhook |
+| Busca de mensagens | Sim | Sim |
+| Threads | Sim | Sim |
+| Compartilhamento de arquivos | Sim | Sim (+ integração nativa com SharePoint) |
+
+**Vantagem extra do Teams sobre o Slack:** Como os agentes rodam no Power Automate (Microsoft), enviar notificações para o Teams é integração nativa — sem conector externo, sem configuração adicional. No Slack, precisaria de um app ou webhook separado.
+
+**Economia:** O custo exato depende do plano de Slack que vocês têm, mas tipicamente:
+
+| Plano Slack | Custo aproximado | Com Teams |
+|------------|-----------------|-----------|
+| Pro | ~US$ 7-8/usuário/mês | R$ 0 (cancelar) |
+| Business+ | ~US$ 12-13/usuário/mês | R$ 0 (cancelar) |
+
+Para um time de 5-8 pessoas, isso pode representar **R$ 200-600/mês de economia**.
+
+**Migração:** Criar os mesmos canais no Teams (ex: #comercial, #leads, #reuniões), redirecionar os webhooks do RD Station para o Teams, e avisar o time. Leva 1-2 dias.
+
+---
+
+### 7. Custom GPT (ChatGPT) — a voz do escritório
 
 **O que é:** Um GPT personalizado dentro do ChatGPT que vocês já assinam, treinado com o Playbook Comercial, os scripts, o tom de voz, os arquétipos (Sábio 40%, Prestativo 35%, Criador 25%) e os exemplos reais de mensagens do HB. Ele se torna o **repositório vivo do jeito de falar do escritório**.
 
@@ -210,7 +244,7 @@ mensagens no tom HB           "Referência de tom: [exemplos]"
 por ICP e canal               + dados do lead específico
                               ──►  Mensagem personalizada
                                    no tom HB
-                              ──►  Slack para aprovação
+                              ──►  Teams para aprovação
                               ──►  Disparo
 ```
 
@@ -227,7 +261,7 @@ por ICP e canal               + dados do lead específico
      ┌───────────────────┼───────────────────┐
      │                   │                   │
 ┌────▼────┐        ┌────▼────┐        ┌─────▼─────┐
-│ RD Stn  │        │  Slack  │        │  Gemini   │
+│ RD Stn  │        │  Teams  │        │  Gemini   │
 │  CRM    │        │         │        │   API     │
 │(já pago)│        │(já pago)│        │  (grátis) │
 └─────────┘        └─────────┘        └───────────┘
@@ -278,7 +312,7 @@ Os 10 agentes continuam exatamente os mesmos. Os prompts são idênticos. O que 
 | Enriquecimento | Apollo.io: R$ 200-400/mês | Busca web + IA: **R$ 0** |
 | Busca web | Tavily pago: R$ 140/mês | Tavily free: **R$ 0** (1.000/mês) |
 | CRM | RD Station: já pago | RD Station: já pago |
-| Comunicação | Slack: já pago | Slack: já pago |
+| Comunicação | ~~Slack~~: cancelar | Teams: já incluso no M365 |
 | M365 | já pago | já pago |
 | ChatGPT | já pago (Custom GPT = tom de voz) | já pago |
 | Claude Pro | já pago (análise e brainstorm) | já pago |
@@ -305,7 +339,7 @@ A ideia é: **começar com R$ 0 e só pagar quando um gargalo real aparecer.**
 | Métrica | Sem agentes | Com agentes |
 |---------|-------------|-------------|
 | Tempo de pesquisa por lead | 30-60 min | 2 min (automático) |
-| Tempo de briefing pré-reunião | 20-30 min | 0 min (entregue no Slack) |
+| Tempo de briefing pré-reunião | 20-30 min | 0 min (entregue no Teams) |
 | Tempo de pós-reunião (resumo + CRM) | 30-45 min | 5 min (revisão) |
 | Tempo de criação de mensagens | 15-20 min/lead | 1 min (aprovação) |
 | Leads esquecidos sem follow-up | Frequente | Zero |
